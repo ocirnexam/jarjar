@@ -50,7 +50,8 @@ async def join_voice(ctx):
 		channel = ctx.author.voice.channel
 		await channel.connect()
 		await ctx.send("Sucessfully joined your voice channel")
-	except:
+	except as e:
+		print(e)
 		await ctx.send(f"ERROR: You're not in a voice channel {ctx.message.author.mention}")
 
 @client.command(name='exit-channel', help="Leaves the voice channel")
@@ -58,7 +59,8 @@ async def exit_voice(ctx):
 	try:
 		await ctx.voice_client.disconnect()
 		await ctx.send("Sucessfully left the voice channel")
-	except:
+	except as e:
+		print(e)
 		await ctx.send(f"ERROR: {ctx.message.author.mention} You stupid? I'm not in a voice channel!")
 
 @client.command(name='payai', help="Plays Ich hab garnichts gemacht")
@@ -70,7 +72,8 @@ async def play_payai(ctx):
 		if not vc.is_playing():
 			await ctx.send("PAAAAAAAAAAAYAAAAAAAAAAAI, ICH HAB GANIX GEMAKT")
 			vc.play(audio, after=None)
-	except:
+	except as e:
+		print(e)
 		await ctx.send(f"Something went wrong playing the song...")
 
 		
