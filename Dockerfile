@@ -7,6 +7,6 @@ RUN python -m pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-ENV DISCORD_TOKEN
+ENV DISCORD_TOKEN REPLACE_THIS_TOKEN
 
 CMD [ "python", "./bot.py"]
