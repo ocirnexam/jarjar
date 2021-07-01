@@ -1,4 +1,4 @@
-FROM ampervue/ffmpeg
+FROM yonggan/docker-ffmpeg
 
 WORKDIR /usr/src/app
 
