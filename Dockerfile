@@ -1,4 +1,4 @@
-FROM python:3
+FROM ampervue/ffmpeg
 
 WORKDIR /usr/src/app
 
