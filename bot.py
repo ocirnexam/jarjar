@@ -1,8 +1,10 @@
 import os
 import re
+import time
 from discord.ext import commands
 from discord import FFmpegPCMAudio
 from dotenv import load_dotenv
+from yt_utils.YTDLSource import YTDLSource
 
 load_dotenv()
 
@@ -44,17 +46,7 @@ async def quit_bot(ctx):
 	else:
 		await ctx.send(f"I shall not be quitted! Ach ja, und {ctx.message.author.mention} ist ein Noob ;)")
 
-@client.command(name='join', help="Joins the voice channel you're currently in")
-async def join_voice(ctx):
-	try:
-		channel = ctx.author.voice.channel
-		await channel.connect()
-		await ctx.send("Sucessfully joined your voice channel")
-	except Exception as e:
-		print(e)
-		await ctx.send(f"ERROR: You're not in a voice channel {ctx.message.author.mention}")
-
-@client.command(name='exit-channel', help="Leaves the voice channel")
+@client.command(name='leave', help="Leaves the voice channel")
 async def exit_voice(ctx):
 	try:
 		await ctx.voice_client.disconnect()
@@ -80,5 +72,21 @@ async def play_payai(ctx):
 @client.command(name='stop', help="Stops playing music")
 async def stop_music(ctx):
 	ctx.voice_client.stop()
+
+@client.command(name='yt', help="Play Songs from Youtube! Usage: .yt <link>")
+async def play(ctx, *, url):
+	try:
+		print(url)
+		voice_channel = await ctx.author.voice.channel.connect()
+		
+		async with ctx.typing():
+			player = await YTDLSource.from_url(url, loop=client.loop)
+			voice_channel.play(player, after=lambda e: print('Player error: %s'))
+		await ctx.send(f'Now playing: {player.title}')
+
+	except Exception as e:
+		await ctx.send(f"You're not in a voice channel {ctx.message.author.mention}")	
+		
+
 
 client.run(TOKEN)
