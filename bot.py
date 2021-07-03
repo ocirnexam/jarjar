@@ -66,7 +66,7 @@ async def play_payai(ctx):
 	except Exception as e:
 		print(e)
 		await ctx.send(f"Something went wrong playing the song... ")
-		print(e)
+		
 
 		
 @client.command(name='stop', help="Stops playing music")
@@ -74,19 +74,24 @@ async def stop_music(ctx):
 	ctx.voice_client.stop()
 
 @client.command(name='yt', help="Play Songs from Youtube! Usage: .yt <link>")
-async def play(ctx, *, url):
+async def play(ctx, *, input):
 	try:
-		print(url)
 		voice_channel = await ctx.author.voice.channel.connect()
 		
-		async with ctx.typing():
-			player = await YTDLSource.from_url(url, loop=client.loop)
-			voice_channel.play(player, after=lambda e: print('Player error: %s'))
-		await ctx.send(f'Now playing: {player.title}')
+		if "youtube.com" in input:
+			async with ctx.typing():
+				player = await YTDLSource.from_url(input, loop=client.loop)
+				voice_channel.play(player)
+			await ctx.send(f'Now playing: {player.title}')
+		else:
+			async with ctx.typing():
+				player = await YTDLSource.from_text(input, loop=client.loop)
+				voice_channel.play(player)
+			await ctx.send(f'Now playing: {player.title}')
 
 	except Exception as e:
-		await ctx.send(f"You're not in a voice channel {ctx.message.author.mention} ")
-		print(e)	
+		print(e)
+		await ctx.send(f"You're not in a voice channel {ctx.message.author.mention} ")	
 		
 
 

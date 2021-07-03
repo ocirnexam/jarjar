@@ -2,6 +2,10 @@ import discord
 from functools import partial
 from youtube_dl import YoutubeDL
 import youtube_dl
+import re
+from youtubesearchpython import VideosSearch
+
+BASE = "https://youtube.com/results"
 
 youtube_dl.utils.bug_reports_message = lambda: ''
 
@@ -46,3 +50,21 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
         return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
+    @classmethod
+    async def from_text(cls, *text, loop=None, stream=False):
+        search = ""
+        for i in text:
+            search += i
+        videosSearch = VideosSearch(search, limit = 1)
+        url = videosSearch.result()['result'][0]['link']
+        print(url)
+        loop = loop or asyncio.get_event_loop()
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        if 'entries' in data:
+            # take first item from a playlist
+            data = data['entries'][0]
+
+        filename = data['url'] if stream else ytdl.prepare_filename(data)
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+
