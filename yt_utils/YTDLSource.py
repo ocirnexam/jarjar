@@ -2,7 +2,6 @@ import discord
 from functools import partial
 from youtube_dl import YoutubeDL
 import youtube_dl
-import re
 from youtubesearchpython import VideosSearch
 
 BASE = "https://youtube.com/results"

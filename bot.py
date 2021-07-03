@@ -1,5 +1,6 @@
 import os
 import re
+import asyncio
 from discord.ext import commands
 from discord import FFmpegPCMAudio
 from dotenv import load_dotenv
