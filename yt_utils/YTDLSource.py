@@ -1,9 +1,7 @@
 import discord
-import itertools
 from functools import partial
 from youtube_dl import YoutubeDL
 import youtube_dl
-from async_timeout import timeout
 
 youtube_dl.utils.bug_reports_message = lambda: ''
 

@@ -1,6 +1,5 @@
 import os
 import re
-import time
 from discord.ext import commands
 from discord import FFmpegPCMAudio
 from dotenv import load_dotenv
@@ -66,7 +65,8 @@ async def play_payai(ctx):
 			vc.play(audio, after=None)
 	except Exception as e:
 		print(e)
-		await ctx.send(f"Something went wrong playing the song...")
+		await ctx.send(f"Something went wrong playing the song... ")
+		print(e)
 
 		
 @client.command(name='stop', help="Stops playing music")
@@ -85,7 +85,8 @@ async def play(ctx, *, url):
 		await ctx.send(f'Now playing: {player.title}')
 
 	except Exception as e:
-		await ctx.send(f"You're not in a voice channel {ctx.message.author.mention}")	
+		await ctx.send(f"You're not in a voice channel {ctx.message.author.mention} ")
+		print(e)	
 		
 
 
