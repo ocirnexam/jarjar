@@ -85,9 +85,14 @@ async def play(ctx, *, input):
 			await ctx.send(f'Now playing: {player.title}')
 		else:
 			async with ctx.typing():
-				player = await YTDLSource.from_text(input, loop=client.loop)
-				voice_channel.play(player)
-			await ctx.send(f'Now playing: {player.title}')
+				song = await YTDLSource.from_text(input, loop=client.loop)
+				voice_channel.play(song)
+			await ctx.send(f'Now playing: {song.title}')
+
+		while voice_channel.is_playing():
+			await asyncio.sleep(1)
+		await voice_channel.disconnect()
+
 
 	except Exception as e:
 		print(e)
