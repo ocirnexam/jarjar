@@ -1,5 +1,5 @@
 import discord
-from functools import partial
+import asyncio
 from youtube_dl import YoutubeDL
 import youtube_dl
 from youtubesearchpython import VideosSearch
@@ -57,7 +57,6 @@ class YTDLSource(discord.PCMVolumeTransformer):
             search += i
         videosSearch = VideosSearch(search, limit = 1)
         url = videosSearch.result()['result'][0]['link']
-        print(url)
         loop = loop or asyncio.get_event_loop()
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
         if 'entries' in data:

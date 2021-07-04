@@ -1,12 +1,17 @@
+from collections import deque
 import os
 import re
 import asyncio
+import discord
 from discord.ext import commands
 from discord import FFmpegPCMAudio
 from dotenv import load_dotenv
 from yt_utils.YTDLSource import YTDLSource
+from collections import deque
 
 load_dotenv()
+
+queue = deque()
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -48,9 +53,12 @@ async def quit_bot(ctx):
 
 @client.command(name='leave', help="Leaves the voice channel")
 async def exit_voice(ctx):
+	global queue
 	try:
 		await ctx.voice_client.disconnect()
 		await ctx.send("Sucessfully left the voice channel")
+		if len(queue) > 0:
+			queue = []
 	except Exception as e:
 		print(e)
 		await ctx.send(f"ERROR: {ctx.message.author.mention} You stupid? I'm not in a voice channel!")
@@ -68,37 +76,92 @@ async def play_payai(ctx):
 		print(e)
 		await ctx.send(f"Something went wrong playing the song... ")
 		
-
-		
-@client.command(name='stop', help="Stops playing music")
-async def stop_music(ctx):
-	ctx.voice_client.stop()
-
-@client.command(name='yt', help="Play Songs from Youtube! Usage: .yt <link>")
-async def play(ctx, *, input):
+@client.command(name='skip', help="Skips the current song")
+async def skip_music(ctx):
 	try:
-		voice_channel = await ctx.author.voice.channel.connect()
+		await ctx.send("Aight, gonna skip this!")
+		ctx.voice_client.stop()
+	except:
+		await ctx.send("You're not in a voice channel!")
+
+@client.command(name='pause', help="pauses the music")
+async def pause_music(ctx):
+	try:
+		ctx.voice_client.pause()
+		await ctx.send("Pausing music")
+	except:
+		await ctx.send("You're not in a voice channel")
+
+@client.command(name='resume', help="Resumes playing music")
+async def resume_music(ctx):
+	try:
+		ctx.voice_client.resume()
+		await ctx.send("Resuming music")
+	except:
+		await ctx.send("You're not in a voice channel!")
+
+@client.command(name="volume", help="Sets the volume for MEXAM (values from 0-100)")
+async def volume(ctx, value):
+	try:
+		ctx.voice_client.source.volume = int(value) / 100
+		await ctx.send(f"Volume set to {value}%")
+	except:
+		await ctx.send("You're not in a voice channel")
+
+@client.command(name='yt', help="Play Songs from Youtube!")
+async def play(ctx, *, input):
+	global queue
+	try:
+		channel = ctx.author.voice.channel
+		voice_channel = discord.utils.get(client.voice_clients, guild=ctx.message.guild)
+		if voice_channel is None:
+			voice_channel = await channel.connect()
 		
 		if "youtube.com" in input:
-			async with ctx.typing():
-				player = await YTDLSource.from_url(input, loop=client.loop)
-				voice_channel.play(player)
-			await ctx.send(f'Now playing: {player.title}')
+			song = await YTDLSource.from_url(input, loop=client.loop)
+			queue.append(song)
+			if not voice_channel.is_playing() and not voice_channel.is_paused():
+				await play_queue(ctx, voice_channel)
+			else:
+				await ctx.send(f"Queued {song.title}")
 		else:
-			async with ctx.typing():
-				song = await YTDLSource.from_text(input, loop=client.loop)
-				voice_channel.play(song)
-			await ctx.send(f'Now playing: {song.title}')
-
-		while voice_channel.is_playing():
-			await asyncio.sleep(1)
-		await voice_channel.disconnect()
+			song = await YTDLSource.from_text(input, loop=client.loop)
+			queue.append(song)
+			if not voice_channel.is_playing() and not voice_channel.is_paused():
+				await play_queue(ctx, voice_channel)
+			else:
+				await ctx.send(f"Queued {song.title}")
+		
 
 
 	except Exception as e:
 		print(e)
 		await ctx.send(f"You're not in a voice channel {ctx.message.author.mention} ")	
-		
 
+
+@client.command(name='queue', help="Shows the current youtube queue")
+async def queue_show(ctx):
+	global queue
+	if len(queue) == 0:
+		await ctx.send("No Songs in queue!")
+	else:
+		songs = ""
+		count = 0
+		for i in queue:
+			count += 1
+			songs += str(count) + ". " + i.title + "\n"
+		await ctx.send(songs)
+
+async def play_queue(ctx, voice_channel):
+	global queue
+	while len(queue) > 0:
+		song = queue.popleft()
+		voice_channel.play(song)
+		await ctx.send(f'Now playing: {song.title}')
+		while voice_channel.is_playing() or voice_channel.is_paused():
+			await asyncio.sleep(1)
+	await voice_channel.disconnect()
+	await ctx.send("That's everything you added. Gonna stop now!")
+	
 
 client.run(TOKEN)
