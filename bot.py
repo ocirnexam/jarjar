@@ -112,21 +112,19 @@ async def play(ctx, *, input):
 		
 		if "youtube.com" in input:
 			song = await YTDLSource.from_url(input, loop=client.loop)
-			queue.append(song)
+			queue.append((ctx.message.guild, song))
 			if not voice_channel.is_playing() and not voice_channel.is_paused():
-				await play_queue(ctx, voice_channel)
+				await play_queue(ctx, voice_channel, ctx.message.guild)
 			else:
 				await ctx.send(f"Queued {song.title}")
 		else:
 			song = await YTDLSource.from_text(input, loop=client.loop)
-			queue.append(song)
+			queue.append((ctx.message.guild, song))
 			if not voice_channel.is_playing() and not voice_channel.is_paused():
-				await play_queue(ctx, voice_channel)
+				await play_queue(ctx, voice_channel, ctx.message.guild)
 			else:
 				await ctx.send(f"Queued {song.title}")
 		
-
-
 	except Exception as e:
 		print(e)
 		await ctx.send(f"You're not in a voice channel {ctx.message.author.mention} ")	
@@ -135,20 +133,23 @@ async def play(ctx, *, input):
 @client.command(name='queue', help="Shows the current youtube queue")
 async def queue_show(ctx):
 	global queue
-	if len(queue) == 0:
-		await ctx.send("No Songs in queue!")
-	else:
-		songs = ""
-		count = 0
-		for i in queue:
+	songs = ""
+	count = 0
+	for i, j in queue:
+		if ctx.message.guild == i:
 			count += 1
-			songs += str(count) + ". " + i.title + "\n"
+			songs += str(count) + ". " + j.title + "\n"
+	if count == 0:
+		await ctx.send("No songs in queue!")
+	else:
 		await ctx.send(songs)
 
-async def play_queue(ctx, voice_channel):
+#TODO: implement clear_queue
+
+async def play_queue(ctx, voice_channel, guild):
 	global queue
 	while len(queue) > 0:
-		song = queue.popleft()
+		song = queue.popleft()[1]
 		voice_channel.play(song)
 		ctx.voice_client.source.volume = volume / 100
 		await ctx.send(f'Now playing: {song.title}')
