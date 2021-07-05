@@ -63,19 +63,6 @@ async def exit_voice(ctx):
 	except Exception as e:
 		print(e)
 		await ctx.send(f"ERROR: {ctx.message.author.mention} You stupid? I'm not in a voice channel!")
-
-@client.command(name='payai', help="Plays Ich hab garnichts gemacht")
-async def play_payai(ctx):
-	try:
-		channel = ctx.author.voice.channel
-		vc = await channel.connect()
-		audio = FFmpegPCMAudio('garnichts.mp3')
-		if not vc.is_playing():
-			await ctx.send("PAAAAAAAAAAAYAAAAAAAAAAAI, ICH HAB GANIX GEMAKT")
-			vc.play(audio, after=None)
-	except Exception as e:
-		print(e)
-		await ctx.send(f"Something went wrong playing the song... ")
 		
 @client.command(name='skip', help="Skips the current song")
 async def skip_music(ctx):
@@ -101,7 +88,7 @@ async def resume_music(ctx):
 	except:
 		await ctx.send("You're not in a voice channel!")
 
-@client.command(name="volume", help="Sets the volume for MEXAM (values from 0-100)")
+@client.command(name="volume", help="Sets the volume for MEXAM (values from 0-100) usage: .volume (shows current volume) / .volume <number> (sets volume to <number>%)")
 async def volume_set(ctx, value=-1):
 	global volume
 	if value == -1:
