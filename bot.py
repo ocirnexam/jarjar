@@ -12,6 +12,7 @@ from collections import deque
 load_dotenv()
 
 queue = deque()
+volume = 50
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -101,10 +102,15 @@ async def resume_music(ctx):
 		await ctx.send("You're not in a voice channel!")
 
 @client.command(name="volume", help="Sets the volume for MEXAM (values from 0-100)")
-async def volume(ctx, value):
+async def volume_set(ctx, value=-1):
+	global volume
+	if value == -1:
+		await ctx.send(f"Volume is currently at {volume}%")
+		return
 	try:
+		volume = value
 		ctx.voice_client.source.volume = int(value) / 100
-		await ctx.send(f"Volume set to {value}%")
+		await ctx.send(f"Volume set to {volume}%")
 	except:
 		await ctx.send("You're not in a voice channel")
 
@@ -157,6 +163,7 @@ async def play_queue(ctx, voice_channel):
 	while len(queue) > 0:
 		song = queue.popleft()
 		voice_channel.play(song)
+		ctx.voice_client.source.volume = volume / 100
 		await ctx.send(f'Now playing: {song.title}')
 		while voice_channel.is_playing() or voice_channel.is_paused():
 			await asyncio.sleep(1)
