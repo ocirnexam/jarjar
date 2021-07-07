@@ -88,7 +88,7 @@ async def resume_music(ctx):
 	except:
 		await ctx.send("You're not in a voice channel!")
 
-@client.command(name="volume", help="Sets the volume for MEXAM (values from 0-100) usage: .volume (shows current volume) / .volume <number> (sets volume to <number>%)")
+@client.command(name="volume", aliases=['v', 'vol'], help="Sets the volume for MEXAM (values from 0-100) usage: .volume (shows current volume) / .volume <number> (sets volume to <number>%)")
 async def volume_set(ctx, value=-1):
 	global volume
 	if value == -1:
@@ -114,16 +114,16 @@ async def play(ctx, *, input):
 			song = await YTDLSource.from_url(input, loop=client.loop)
 			queue.append((ctx.message.guild, song))
 			if not voice_channel.is_playing() and not voice_channel.is_paused():
-				await play_queue(ctx, voice_channel, ctx.message.guild)
+				await play_queue(ctx, voice_channel)
 			else:
-				await ctx.send(f"Queued {song.title}")
+				await ctx.send(f"Queued {song[0].title}")
 		else:
 			song = await YTDLSource.from_text(input, loop=client.loop)
 			queue.append((ctx.message.guild, song))
 			if not voice_channel.is_playing() and not voice_channel.is_paused():
-				await play_queue(ctx, voice_channel, ctx.message.guild)
+				await play_queue(ctx, voice_channel)
 			else:
-				await ctx.send(f"Queued {song.title}")
+				await ctx.send(f"Queued {song[0].title}")
 		
 	except Exception as e:
 		print(e)
@@ -138,7 +138,7 @@ async def queue_show(ctx):
 	for i, j in queue:
 		if ctx.message.guild == i:
 			count += 1
-			songs += str(count) + ". " + j.title + "\n"
+			songs += str(count) + ". " + j[0].title + "\n"
 	if count == 0:
 		await ctx.send("No songs in queue!")
 	else:
@@ -146,15 +146,23 @@ async def queue_show(ctx):
 
 #TODO: implement clear_queue
 
-async def play_queue(ctx, voice_channel, guild):
+async def play_queue(ctx, voice_channel):
 	global queue
 	while len(queue) > 0:
-		song = queue.popleft()[1]
-		voice_channel.play(song)
-		ctx.voice_client.source.volume = volume / 100
-		await ctx.send(f'Now playing: {song.title}')
-		while voice_channel.is_playing() or voice_channel.is_paused():
-			await asyncio.sleep(1)
+		item = queue.popleft()
+		for i in range(len(queue), 0, -1):
+			if queue[i][0] == ctx.message.guild:
+				item = queue[i]
+				queue.remove(item)
+		if item[0] == ctx.message.guild:
+			voice_channel.play(item[1][0])
+			ctx.voice_client.source.volume = volume / 100
+			await ctx.send(f'Now playing: {item[1][0].title}')
+			while voice_channel.is_playing() or voice_channel.is_paused():
+				await asyncio.sleep(1)
+			os.system("rm -r " + item[1][1])
+		else:
+			pass
 	await voice_channel.disconnect()
 	await ctx.send("That's everything you added. Gonna stop now!")
 	
