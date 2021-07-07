@@ -88,7 +88,7 @@ async def resume_music(ctx):
 	except:
 		await ctx.send("You're not in a voice channel!")
 
-@client.command(name="volume", aliases=['v', 'vol'], help="Sets the volume for MEXAM (values from 0-100) usage: .volume (shows current volume) / .volume <number> (sets volume to <number>%)")
+@client.command(name="volume", aliases=['v', 'vol', 'VOL', 'VOLUME', 'V'], help="Sets the volume for MEXAM (values from 0-100) usage: .volume (shows current volume) / .volume <number> (sets volume to <number>%)")
 async def volume_set(ctx, value=-1):
 	global volume
 	if value == -1:
@@ -156,18 +156,18 @@ async def clear_queue(ctx):
 async def play_queue(ctx, voice_channel):
 	global queue
 	while len(queue) > 0:
-		item = queue.popleft()
 		for i in range(len(queue) - 1, -1, -1):
 			if queue[i][0] == ctx.message.guild:
 				item = queue[i]
 				queue.remove(item)
+				break
 		if item[0] == ctx.message.guild:
 			voice_channel.play(item[1][0])
 			ctx.voice_client.source.volume = volume / 100
 			await ctx.send(f'Now playing: {item[1][0].title}')
 			while voice_channel.is_playing() or voice_channel.is_paused():
 				await asyncio.sleep(1)
-			os.system("rm -r " + item[1][1])
+			os.system("rm " + item[1][1])
 		else:
 			pass
 	await voice_channel.disconnect()
