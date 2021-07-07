@@ -144,13 +144,20 @@ async def queue_show(ctx):
 	else:
 		await ctx.send(songs)
 
-#TODO: implement clear_queue
+@client.command(name='clear-queue', aliases=['qcls', 'qclear'], help="Clears the current queue")
+async def clear_queue(ctx):
+	global queue
+	for i in range(len(queue) - 1, -1, -1):
+		if ctx.message.guild == queue[i][0]:
+			os.system("rm -r " + queue[i][1][1])
+			queue.remove(queue[i])
+	await ctx.send("Queue cleared! :sunglasses:")
 
 async def play_queue(ctx, voice_channel):
 	global queue
 	while len(queue) > 0:
 		item = queue.popleft()
-		for i in range(len(queue), 0, -1):
+		for i in range(len(queue) - 1, -1, -1):
 			if queue[i][0] == ctx.message.guild:
 				item = queue[i]
 				queue.remove(item)
