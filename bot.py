@@ -156,7 +156,7 @@ async def clear_queue(ctx):
 async def play_queue(ctx, voice_channel):
 	global queue
 	while len(queue) > 0:
-		for i in range(len(queue) - 1, -1, -1):
+		for i in range(0, len(queue)):
 			if queue[i][0] == ctx.message.guild:
 				item = queue[i]
 				queue.remove(item)
