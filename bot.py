@@ -109,33 +109,7 @@ async def volume_set(ctx, value=-1):
 	except:
 		await ctx.send("You're not in a voice channel")
 
-@client.command(name='yt', help="Play Songs from Youtube!")
-async def play(ctx, *, input):
-	global queue
-	try:
-		channel = ctx.author.voice.channel
-		voice_channel = discord.utils.get(client.voice_clients, guild=ctx.message.guild)
-		if voice_channel is None:
-			voice_channel = await channel.connect()
-		
-		if "youtube.com" in input:
-			song = await YTDLSource.from_url(input, loop=client.loop)
-			queue.append((ctx.message.guild, song))
-			if not voice_channel.is_playing() and not voice_channel.is_paused():
-				await play_queue(ctx, voice_channel)
-			else:
-				await ctx.send(f"Queued {song[0].title}")
-		else:
-			song = await YTDLSource.from_text(input, loop=client.loop)
-			queue.append((ctx.message.guild, song))
-			if not voice_channel.is_playing() and not voice_channel.is_paused():
-				await play_queue(ctx, voice_channel)
-			else:
-				await ctx.send(f"Queued {song[0].title}")
-		
-	except Exception as e:
-		print(e)
-		await ctx.send(f"You're not in a voice channel {ctx.message.author.mention} ")	
+	
 
 
 @client.command(name='queue', help="Shows the current youtube queue")
