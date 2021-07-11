@@ -12,7 +12,7 @@ from collections import deque
 load_dotenv()
 
 queue = deque()
-volume = 50
+volume = []
 
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -91,13 +91,21 @@ async def resume_music(ctx):
 @client.command(name="volume", aliases=['v', 'vol', 'VOL', 'VOLUME', 'V'], help="Sets the volume for MEXAM (values from 0-100) usage: .volume (shows current volume) / .volume <number> (sets volume to <number>%)")
 async def volume_set(ctx, value=-1):
 	global volume
-	if value == -1:
-		await ctx.send(f"Volume is currently at {volume}%")
-		return
 	try:
-		volume = value
+		if value == -1:
+			for vol in volume:
+				if vol[0] == ctx.message.guild:
+					await ctx.send(f"Volume is currently at {vol[1]}%")
+					break
+			return
+	
+		if len(volume) == 0:
+			volume.append([ctx.message.guild, value])
 		ctx.voice_client.source.volume = int(value) / 100
-		await ctx.send(f"Volume set to {volume}%")
+		for vol in volume:
+			if vol[0] == ctx.message.guild:
+				vol[1] = value
+		await ctx.send(f"Volume set to {value}%")
 	except:
 		await ctx.send("You're not in a voice channel")
 
@@ -155,6 +163,7 @@ async def clear_queue(ctx):
 
 async def play_queue(ctx, voice_channel):
 	global queue
+	global volume
 	while len(queue) > 0:
 		for i in range(0, len(queue)):
 			if queue[i][0] == ctx.message.guild:
@@ -162,8 +171,12 @@ async def play_queue(ctx, voice_channel):
 				queue.remove(item)
 				break
 		if item[0] == ctx.message.guild:
+			if len(volume) == 0:
+				volume.append([ctx.message.guild, 50])
 			voice_channel.play(item[1][0])
-			ctx.voice_client.source.volume = volume / 100
+			for vol in volume:
+				if vol[0] == ctx.message.guild:
+					ctx.voice_client.source.volume = vol[1] / 100
 			await ctx.send(f'Now playing: {item[1][0].title}')
 			while voice_channel.is_playing() or voice_channel.is_paused():
 				await asyncio.sleep(1)

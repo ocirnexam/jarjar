@@ -4,8 +4,6 @@ from youtube_dl import YoutubeDL
 import youtube_dl
 from youtubesearchpython import VideosSearch
 
-BASE = "https://youtube.com/results"
-
 youtube_dl.utils.bug_reports_message = lambda: ''
 
 
