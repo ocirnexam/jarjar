@@ -4,3 +4,4 @@ python-dotenv
 python-ffmpeg
 youtube_dl
 youtube-search-python
+pytube

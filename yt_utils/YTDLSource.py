@@ -4,6 +4,7 @@ from youtube_dl import YoutubeDL
 import youtube_dl
 from youtubesearchpython import VideosSearch
 
+
 youtube_dl.utils.bug_reports_message = lambda: ''
 
 
@@ -37,19 +38,22 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = data.get('url')
 
     @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False):
-        loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+    async def from_url(cls, url, *, loop=None, stream=True, volume=0.5):
+        try:
+            loop = loop or asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
 
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
+            if 'entries' in data:
+                # take first item from a playlist
+                data = data['entries'][0]
 
-        filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data), filename
+            filename = data['url'] if stream else ytdl.prepare_filename(data)
+            return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data, volume=volume), filename
+        except Exception as e:
+            return None
 
     @classmethod
-    async def from_text(cls, *text, loop=None, stream=False):
+    async def from_text(cls, *text, loop=None, stream=True, volume=0.5):
         search = ""
         for i in text:
             search += i
@@ -62,5 +66,5 @@ class YTDLSource(discord.PCMVolumeTransformer):
             data = data['entries'][0]
 
         filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data), filename
+        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data, volume=volume), filename
 
