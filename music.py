@@ -42,18 +42,22 @@ class Music(commands.Cog):
                     item = self.queue[i]
                     self.queue.remove(item)
                     break
-            if item[0] == ctx.message.guild:
-                if len(self.volume) == 0:
-                    self.volume.append([ctx.message.guild, 50])
+            if item[0] == ctx.message.guild:                    
                 voice_channel.play(item[1][0])
                 current_volume = None
                 for vol in self.volume:
                     if vol[0] == ctx.message.guild:
                         ctx.voice_client.source.volume = vol[1] / 100
                         current_volume = vol[1]
+                if current_volume == None:
+                    new_vol = [ctx.message.guild, 50]
+                    self.volume.append(new_vol)
+                    current_volume = new_vol[1]
+                    ctx.voice_client.source.volume = new_vol[1] / 100
+
 
                 emb = discord.Embed(title=':musical_note: Playing', color=discord.Color.blue())
-                emb.add_field(name="Information", value=f"Requested by {item[2].mention}\nVolume: {current_volume}", inline=False)
+                emb.add_field(name="Information", value=f"Requested by {item[2].mention}\nVolume: **{current_volume}%**", inline=False)
                 emb.add_field(name="Song", value=f'{item[1][0].title}', inline=False)
                 await send_embed(ctx, emb)
 
@@ -62,6 +66,7 @@ class Music(commands.Cog):
             else:
                 pass
         await voice_channel.disconnect()
+        self.i = 0
         emb = discord.Embed(title='End', color=discord.Color.red())
         emb.add_field(name="Queue finished", value=f"That's everything you added!")
         await send_embed(ctx, emb)
@@ -83,7 +88,7 @@ class Music(commands.Cog):
     async def skip_music(self, ctx):
         
         if self.i == 4:
-            self.i = 0
+            self.i = 3
         try:
             await ctx.send(self.skipping[self.i])
             ctx.voice_client.stop()
@@ -177,10 +182,10 @@ class Music(commands.Cog):
         songs = ""
         count = 0
         emb = discord.Embed(title='Queue', color=discord.Color.green())
-        for i, j in self.queue:
+        for i, j, k in self.queue:
             if ctx.message.guild == i:
                 count += 1
-                songs += str(count) + ". " + j[0].title + "\n"
+                songs += "**" + str(count) + ".** " + j[0].title + ", requested by " + k.mention + "\n"
         if count == 0:
             await ctx.send("No songs in queue!")
         else:
@@ -188,7 +193,7 @@ class Music(commands.Cog):
             await send_embed(ctx, emb)
 
 
-    @commands.command(name='clear-queue', aliases=['qcls', 'qclear'], help="Clears the current queue")
+    @commands.command(name='clear-queue', aliases=['qcls', 'qclear', 'clear'], help="Clears the current queue")
     async def clear_queue(self, ctx):
         for i in range(len(self.queue) - 1, -1, -1):
             if ctx.message.guild == self.queue[i][0]:

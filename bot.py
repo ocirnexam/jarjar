@@ -3,6 +3,7 @@ from basic import Basic
 import discord
 from discord.ext import commands
 from dotenv import load_dotenv
+from hangman import Hangman
 from music import Music
 from basic import Basic 
 import os
@@ -14,6 +15,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 bot = commands.Bot(command_prefix='.')
 bot.add_cog(Music(bot))
 bot.add_cog(Basic(bot))
+bot.add_cog(Hangman(bot))
 
 @bot.event
 async def on_ready():

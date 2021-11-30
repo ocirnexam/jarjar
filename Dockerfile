@@ -10,6 +10,6 @@ RUN apt-get update && apt-get install ffmpeg -y
 
 COPY . .
 
-ENV DISCORD_TOKEN
+ENV DISCORD_TOKEN 
 
 CMD [ "python", "./bot.py"]
