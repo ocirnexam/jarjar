@@ -54,17 +54,20 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     @classmethod
     async def from_text(cls, *text, loop=None, stream=True, volume=0.5):
-        search = ""
-        for i in text:
-            search += i
-        videosSearch = VideosSearch(search, limit = 1)
-        url = videosSearch.result()['result'][0]['link']
-        loop = loop or asyncio.get_event_loop()
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
+        try:
+            search = ""
+            for i in text:
+                search += i
+            videosSearch = VideosSearch(search, limit = 1)
+            url = videosSearch.result()['result'][0]['link']
+            loop = loop or asyncio.get_event_loop()
+            data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+            if 'entries' in data:
+                # take first item from a playlist
+                data = data['entries'][0]
 
-        filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data, volume=volume), filename
+            filename = data['url'] if stream else ytdl.prepare_filename(data)
+            return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data, volume=volume), filename
+        except Exception as e:
+            return None
 

@@ -53,7 +53,7 @@ class Music(commands.Cog):
                         current_volume = vol[1]
 
                 emb = discord.Embed(title=':musical_note: Playing', color=discord.Color.blue())
-                emb.add_field(name="Information", value=f"Requested by {ctx.message.author.mention}\nVolume: {current_volume}", inline=False)
+                emb.add_field(name="Information", value=f"Requested by {item[2].mention}\nVolume: {current_volume}", inline=False)
                 emb.add_field(name="Song", value=f'{item[1][0].title}', inline=False)
                 await send_embed(ctx, emb)
 
@@ -135,6 +135,10 @@ class Music(commands.Cog):
     async def play(self, ctx, *, input):
         try:
             vol=0.5
+            if ctx.author.voice == None:
+                await ctx.send(f":x: {ctx.author.mention}, you're not in a voice channel!")
+                return 
+            
             channel = ctx.author.voice.channel
             voice_channel = discord.utils.get(self.bot.voice_clients, guild=ctx.message.guild)
             if voice_channel is None:
@@ -145,34 +149,23 @@ class Music(commands.Cog):
                 input = input[0]
             except:
                 pass
-            
+            song = None
             if "youtube.com" in input:
                 song = await YTDLSource.from_url(input, loop=self.bot.loop, volume=vol)
-                if song == None:
-                    await ctx.send(f":x: Failed to download {input}")
-                    
-                    return
-                self.queue.append((ctx.message.guild, song))
-                if not voice_channel.is_playing() and not voice_channel.is_paused():
-                    await self.play_queue(ctx, voice_channel)
-                else:
-                    emb = discord.Embed(title=':musical_note: Added to queue', color=discord.Color.green())
-                    emb.add_field(name="Information", value=f"Requested by {ctx.message.author.mention}", inline=False)
-                    emb.add_field(name="Song", value=f'{song[0].title}', inline=False)
-                    await send_embed(ctx, emb)
             else:
                 song = await YTDLSource.from_text(input, loop=self.bot.loop, volume=vol)
-                if song == None:
-                    await ctx.send(f":x: Failed to download {input}")
-                    return
-                self.queue.append((ctx.message.guild, song))
-                if not voice_channel.is_playing() and not voice_channel.is_paused():
-                    await self.play_queue(ctx, voice_channel)
-                else:
-                    emb = discord.Embed(title=':musical_note: Added to queue', color=discord.Color.green())
-                    emb.add_field(name="Information", value=f"Requested by {ctx.message.author.mention}", inline=False)
-                    emb.add_field(name="Song", value=f'{song[0].title}', inline=False)
-                    await send_embed(ctx, emb)
+            if song == None:
+                await ctx.send(f":x: Failed to find or download {input}")        
+                return
+
+            self.queue.append((ctx.message.guild, song, ctx.message.author))
+            if not voice_channel.is_playing() and not voice_channel.is_paused():
+                await self.play_queue(ctx, voice_channel)
+            else:
+                emb = discord.Embed(title=':musical_note: Added to queue', color=discord.Color.green())
+                emb.add_field(name="Information", value=f"Requested by {ctx.message.author.mention}", inline=False)
+                emb.add_field(name="Song", value=f'{song[0].title}', inline=False)
+                await send_embed(ctx, emb)
 
         except Exception as e:
             print(e)
