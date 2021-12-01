@@ -59,17 +59,17 @@ class Hangman(commands.Cog):
                             if self.word[i] == input:
                                 count += 1
                                 self.guessed_word[i] = input
-                        if count == 0 and self.tries > 1:
-                            self.tries -= 1
-                            await ctx.send(input + " was not in the word..\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries))
-                        elif self.word != ''.join(self.guessed_word):
+                        if count != 0 and self.word != ''.join(self.guessed_word):
                             await ctx.send("CORRECT\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries))
-                        elif self.word == ''.join(self.guessed_word) and self.tries > 0:
+                        elif count != 0 and self.word == ''.join(self.guessed_word) and self.tries > 0:
                             await ctx.send(":trophy: YOU WON! The word was " + self.word)
                             self.word = None
                             self.guessed_word = []
                             self.player = None
                             self.tries = 10
+                        elif self.tries > 1:
+                            self.tries -= 1
+                            await ctx.send(input + " was not in the word..\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries))
                         else:
                             self.tries -= 1
                             await ctx.send(":no_entry: YOU LOST! The word was " + self.word)
