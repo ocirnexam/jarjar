@@ -38,6 +38,7 @@ class Hangman(commands.Cog):
         self.word = None
         self.guessed_word = []
         self.tries = 10
+        self.used = []
 
     @commands.command(name="hang-create", aliases=['hc'], help="Creates a new Hangman Game for a specific player")
     async def hangman_create(self, ctx):
@@ -55,26 +56,30 @@ class Hangman(commands.Cog):
             if self.tries > 0 and self.word != ''.join(self.guessed_word):
                 if isinstance(input, str):
                     if len(input) == 1:
+                        if input + " " not in self.used:
+                            self.used.append(input + " ")
                         for i in range(len(self.word)):
                             if self.word[i] == input:
                                 count += 1
                                 self.guessed_word[i] = input
                         if count != 0 and self.word != ''.join(self.guessed_word):
-                            await ctx.send("CORRECT\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries))
+                            await ctx.send("CORRECT\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries) + "\n\nUsed Characters: " + ''.join(self.used))
                         elif count != 0 and self.word == ''.join(self.guessed_word) and self.tries > 0:
                             await ctx.send(":trophy: YOU WON! The word was " + self.word)
                             self.word = None
                             self.guessed_word = []
+                            self.used = []
                             self.player = None
                             self.tries = 10
                         elif self.tries > 1:
                             self.tries -= 1
-                            await ctx.send(input + " was not in the word..\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries))
+                            await ctx.send(input + " was not in the word..\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries) + "\n\nUsed Characters: " + ''.join(self.used))
                         else:
                             self.tries -= 1
                             await ctx.send(":no_entry: YOU LOST! The word was " + self.word)
                             self.word = None
                             self.guessed_word = []
+                            self.used = []
                             self.player = None
                             self.tries = 10
                     else:
