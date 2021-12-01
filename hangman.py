@@ -39,7 +39,7 @@ class Hangman(commands.Cog):
         self.guessed_word = []
         self.tries = 10
 
-    @commands.command(name="hang-create", help="Creates a new Hangman Game for a specific player")
+    @commands.command(name="hang-create", aliases=['hc'], help="Creates a new Hangman Game for a specific player")
     async def hangman_create(self, ctx):
         if self.player is None or self.player == ctx.message.author:
             self.player = ctx.message.author
@@ -48,7 +48,7 @@ class Hangman(commands.Cog):
                 self.guessed_word.append('- ')
             await ctx.send("Your word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries))
 
-    @commands.command(name='hang-guess', help='Enter a character as a guess. (Only when you created a hangman game)')
+    @commands.command(name='hang-guess', aliases=['hg'], help='Enter a character as a guess. (Only when you created a hangman game)')
     async def hangman_guess(self, ctx, input):
         count = 0
         if ctx.message.author == self.player:
@@ -59,7 +59,7 @@ class Hangman(commands.Cog):
                             if self.word[i] == input:
                                 count += 1
                                 self.guessed_word[i] = input
-                        if count == 0:
+                        if count == 0 and self.tries > 1:
                             self.tries -= 1
                             await ctx.send(input + " was not in the word..\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries))
                         elif self.word != ''.join(self.guessed_word):
@@ -71,6 +71,7 @@ class Hangman(commands.Cog):
                             self.player = None
                             self.tries = 10
                         else:
+                            self.tries -= 1
                             await ctx.send(":no_entry: YOU LOST! The word was " + self.word)
                             self.word = None
                             self.guessed_word = []
