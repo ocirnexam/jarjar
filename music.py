@@ -185,7 +185,7 @@ class Music(commands.Cog):
         for i, j, k in self.queue:
             if ctx.message.guild == i:
                 count += 1
-                songs += "**" + str(count) + ".** " + j[0].title + ", requested by " + k.mention + "\n"
+                songs += "**" + str(count) + ".** " + j[0].title + ", requested by " + k.mention + "\n\n"
         if count == 0:
             await ctx.send("No songs in queue!")
         else:
