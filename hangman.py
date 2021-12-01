@@ -67,13 +67,13 @@ class Hangman(commands.Cog):
                         elif self.word == ''.join(self.guessed_word) and self.tries > 0:
                             await ctx.send(":trophy: YOU WON! The word was " + self.word)
                             self.word = None
-                            self.guessed_word = None
+                            self.guessed_word = []
                             self.player = None
                             self.tries = 10
                         else:
                             await ctx.send(":no_entry: YOU LOST! The word was " + self.word)
                             self.word = None
-                            self.guessed_word = None
+                            self.guessed_word = []
                             self.player = None
                             self.tries = 10
                     else:
