@@ -7,6 +7,9 @@ import os
 import asyncio
 from yt_utils.YTDLSource import YTDLSource
 
+options = {
+    'options': '-vn'
+}
 
 async def send_embed(ctx, embed):
     """
@@ -37,34 +40,44 @@ class Music(commands.Cog):
 
     async def play_queue(self, ctx, voice_channel):
         while len(self.queue) > 0:
-            for i in range(0, len(self.queue)):
-                if self.queue[i][0] == ctx.message.guild:
-                    item = self.queue[i]
-                    self.queue.remove(item)
-                    break
-            if item[0] == ctx.message.guild:                    
-                voice_channel.play(item[1][0])
-                current_volume = None
-                for vol in self.volume:
-                    if vol[0] == ctx.message.guild:
-                        ctx.voice_client.source.volume = vol[1] / 100
-                        current_volume = vol[1]
-                if current_volume == None:
-                    new_vol = [ctx.message.guild, 50]
-                    self.volume.append(new_vol)
-                    current_volume = new_vol[1]
-                    ctx.voice_client.source.volume = new_vol[1] / 100
+            try:
+                for i in range(0, len(self.queue)):
+                    if self.queue[i][0] == ctx.message.guild:
+                        item = self.queue[i]
+                        self.queue.remove(item)
+                        break
+                if item[0] == ctx.message.guild:                    
+                    voice_channel.play(item[1][0])
+                    current_volume = None
+                    for vol in self.volume:
+                        if vol[0] == ctx.message.guild:
+                            ctx.voice_client.source.volume = vol[1] / 100
+                            current_volume = vol[1]
+                    if current_volume == None:
+                        new_vol = [ctx.message.guild, 50]
+                        self.volume.append(new_vol)
+                        current_volume = new_vol[1]
+                        ctx.voice_client.source.volume = new_vol[1] / 100
 
 
-                emb = discord.Embed(title=':musical_note: Playing', color=discord.Color.blue())
-                emb.add_field(name="Information", value=f"Requested by {item[2].mention}\nVolume: **{current_volume}%**", inline=False)
-                emb.add_field(name="Song", value=f'{item[1][0].title}', inline=False)
-                await send_embed(ctx, emb)
+                    emb = discord.Embed(title=':musical_note: Playing', color=discord.Color.blue())
+                    emb.add_field(name="Information", value=f"Requested by {item[2].mention}\nVolume: **{current_volume}%**", inline=False)
+                    emb.add_field(name="Song", value=f'{item[1][0].title}', inline=False)
+                    await send_embed(ctx, emb)
 
-                while voice_channel.is_playing() or voice_channel.is_paused():
-                    await asyncio.sleep(1)
-            else:
-                pass
+                    while voice_channel.is_playing() or voice_channel.is_paused():
+                        await asyncio.sleep(1)
+                else:
+                    pass
+
+            except Exception as e:
+                await ctx.send(f":x: Sorry, I failed to stream {item[1][0].title}")
+                if voice_channel == None:
+                    channel = ctx.author.voice.channel
+                    voice_channel = discord.utils.get(self.bot.voice_clients, guild=ctx.message.guild)
+                    if voice_channel is None:
+                        voice_channel = await channel.connect()
+        
         await voice_channel.disconnect()
         self.i = 0
         emb = discord.Embed(title='End', color=discord.Color.red())
@@ -197,6 +210,25 @@ class Music(commands.Cog):
     async def clear_queue(self, ctx):
         for i in range(len(self.queue) - 1, -1, -1):
             if ctx.message.guild == self.queue[i][0]:
-                os.system("rm -r " + self.queue[i][1][1])
+                #os.system("rm -r " + self.queue[i][1][1])
                 self.queue.remove(self.queue[i])
         await ctx.send("Queue cleared! :sunglasses:")
+
+    @commands.command(name="dontdoit", help="Really, dont do it")
+    async def dont(self, ctx):
+        try:
+            vol=1
+            if ctx.author.voice == None:
+                await ctx.send(f":x: Lucky you... {ctx.author.mention}, you're not in a voice channel!")
+                return 
+            
+            channel = ctx.author.voice.channel
+            voice_channel = discord.utils.get(self.bot.voice_clients, guild=ctx.message.guild)
+            if voice_channel is None:
+                voice_channel = await channel.connect()
+            if not voice_channel.is_playing() and not voice_channel.is_paused():
+                voice_channel.play(discord.FFmpegPCMAudio("rickroll.mp3", **options))
+                emb = discord.Embed(title='You wanted it!!', color=discord.Color.green())
+                await send_embed(ctx, emb)
+        except:
+            await ctx.send("Lucky you, something went wrong!")

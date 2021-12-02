@@ -19,6 +19,6 @@ bot.add_cog(Hangman(bot))
 
 @bot.event
 async def on_ready():
-	await bot.change_presence(activity=discord.Game(".help | Early Alpha v0.3"))
+	await bot.change_presence(activity=discord.Game(".help | Early Alpha v0.4"))
 
 bot.run(TOKEN)
