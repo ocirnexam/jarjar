@@ -71,12 +71,14 @@ class Music(commands.Cog):
                     pass
 
             except Exception as e:
-                await ctx.send(f":x: Sorry, I failed to stream {item[1][0].title}")
+                await ctx.send(f":x: Retrying to stream {item[1][0].title}")
                 if voice_channel == None:
                     channel = ctx.author.voice.channel
                     voice_channel = discord.utils.get(self.bot.voice_clients, guild=ctx.message.guild)
                     if voice_channel is None:
                         voice_channel = await channel.connect()
+                    if item is not None:
+                        voice_channel.play(item[1][0])
         
         await voice_channel.disconnect()
         self.i = 0

@@ -49,39 +49,36 @@ class Hangman(commands.Cog):
                 self.guessed_word.append('- ')
             await ctx.send("Your word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries))
 
-    @commands.command(name='hang-guess', aliases=['hg'], help='Enter a character as a guess. (Only possible if game created before)')
+    @commands.command(name='hang-guess', aliases=['hg'], help="Enter a single character or a whole word (but if your guess is wrong, you lose as many tries as the length of your guess)")
     async def hangman_guess(self, ctx, input):
         count = 0
         if ctx.message.author == self.player:
             if self.tries > 0 and self.word != ''.join(self.guessed_word):
                 if isinstance(input, str):
-                    if len(input) == 1:
-                        if input + " " not in self.used:
-                            self.used.append(input + " ")
+                    for char in input:
+                        if char + " " not in self.used:
+                            self.used.append(char + " ")
                         for i in range(len(self.word)):
-                            if self.word[i] == input:
+                            if self.word[i] == char:
                                 count += 1
                                 self.guessed_word[i] = input
-                        if count != 0 and self.word != ''.join(self.guessed_word):
-                            await ctx.send("CORRECT\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries) + "\n\nUsed Characters: " + ''.join(self.used))
-                        elif count != 0 and self.word == ''.join(self.guessed_word) and self.tries > 0:
-                            await ctx.send(":trophy: YOU WON! The word was " + self.word)
-                            self.word = None
-                            self.guessed_word = []
-                            self.used = []
-                            self.player = None
-                            self.tries = 10
-                        elif self.tries > 1:
-                            self.tries -= 1
-                            await ctx.send(input + " was not in the word..\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries) + "\n\nUsed Characters: " + ''.join(self.used))
-                        else:
-                            self.tries -= 1
-                            await ctx.send(":no_entry: YOU LOST! The word was " + self.word)
-                            self.word = None
-                            self.guessed_word = []
-                            self.used = []
-                            self.player = None
-                            self.tries = 10
+                    if count != 0 and self.word != ''.join(self.guessed_word):
+                        await ctx.send("CORRECT\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries) + "\n\nUsed Characters: " + ''.join(self.used))
+                    elif count != 0 and self.word == ''.join(self.guessed_word) and self.tries > 0:
+                        await ctx.send(":trophy: YOU WON! The word was " + self.word)
+                        self.word = None
+                        self.guessed_word = []
+                        self.used = []
+                        self.player = None
+                        self.tries = 10
+                    elif self.tries > 1:
+                        self.tries -= 1
+                        await ctx.send(input + " was not in the word..\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries) + "\n\nUsed Characters: " + ''.join(self.used))
                     else:
-                        await ctx.send("```Please enter only one character!```")
-    
+                        await ctx.send(":no_entry: YOU LOST! The word was " + self.word)
+                        self.word = None
+                        self.guessed_word = []
+                        self.used = []
+                        self.player = None
+                        self.tries = 10
+

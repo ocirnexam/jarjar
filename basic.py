@@ -30,14 +30,24 @@ class Basic(commands.Cog):
 
     @commands.Cog.listener()
     async def on_member_join(self, member):
-        channel = member.guild.system_channel
-        await channel.send(f'Hello and welcome on {member.guild.name} {member.name.mention}! :smile:')
+        try:
+            role = discord.utils.get(member.guild.roles, id="915574533090607164")
+            await self.bot.add_roles(member, role)
+        except:
+            print("Failed to add Role")
+        try:
+            channel = member.guild.system_channel
+            await channel.send(f"Welcome to the Just The Usual Server, {member.mention}. Say .help to learn about available commands, and finally, please be kind and decent to one another and enjoy your stay.")
+        except:
+            channel = member.guild.get_channel("860978254797471745")
+            await channel.send(f"Welcome to the Just The Usual Server, {member.mention}. Say .help to learn about available commands, and finally, please be kind and decent to one another and enjoy your stay.")
+	
 
     @commands.command(name='duck', help="Gives you a duckduckgo link for the given search values! Usage: .duck <searchValue 1>-<searchValue 2> ...")
     async def duck_link(self, ctx, *, message):
         if len(message) < 1:
-        	await ctx.send('Invalid arguments! Usage: .duck <searchValue 1> <searchValue 2> ...')
-        	return
+            await ctx.send('Invalid arguments! Usage: .duck <searchValue 1> <searchValue 2> ...')
+            return
 	
         parts = ""
         for part in message:
