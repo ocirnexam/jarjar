@@ -5,7 +5,8 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from hangman import Hangman
 from music import Music
-from basic import Basic 
+from basic import Basic
+from help import Help 
 import os
 
 load_dotenv()
@@ -15,9 +16,11 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 intents = discord.Intents.default()
 intents.members = True
 bot = commands.Bot(command_prefix='.', intents=intents)
+bot.remove_command('help')
 bot.add_cog(Music(bot))
 bot.add_cog(Basic(bot))
 bot.add_cog(Hangman(bot))
+bot.add_cog(Help(bot))
 
 @bot.event
 async def on_ready():

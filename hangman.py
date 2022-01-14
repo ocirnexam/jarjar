@@ -31,6 +31,10 @@ for i in range(len(wordlist)):
     wordlist[i] = wordlist[i].rstrip('\n')
 
 class Hangman(commands.Cog):
+    """
+    Play hangman with me
+    """
+
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
@@ -61,7 +65,7 @@ class Hangman(commands.Cog):
                         for i in range(len(self.word)):
                             if self.word[i] == char:
                                 count += 1
-                                self.guessed_word[i] = input
+                                self.guessed_word[i] = char
                     if count != 0 and self.word != ''.join(self.guessed_word):
                         await ctx.send("CORRECT\nYour word is " + ''.join(self.guessed_word) + "\tTries: " + str(self.tries) + "\n\nUsed Characters: " + ''.join(self.used))
                     elif count != 0 and self.word == ''.join(self.guessed_word) and self.tries > 0:

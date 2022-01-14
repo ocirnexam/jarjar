@@ -2,6 +2,7 @@ import discord
 from discord.ext import commands
 from discord.errors import Forbidden
 from discord import FFmpegPCMAudio
+from discord.ext.commands.errors import MissingRequiredArgument
 from collections import deque
 import os
 import asyncio
@@ -30,6 +31,10 @@ async def send_embed(ctx, embed):
                 f"May you inform the server team about this issue? :slight_smile: ", embed=embed)
 
 class Music(commands.Cog):
+    """
+    Play Music from Youtube
+    """
+
     def __init__(self, bot):
         self.bot = bot
         self._last_member = None
@@ -151,8 +156,11 @@ class Music(commands.Cog):
             await ctx.send("Something went wrong setting the volume!")
 
 
-    @commands.command(name='yt', help="Play Songs from Youtube!\nUsage: .yt <song> <volume> (Volume [0-100] is optional)")
-    async def play(self, ctx, *, input):
+    @commands.command(name='yt', aliases=['play', 'p', 'music'], help="Play Songs from Youtube!\nUsage: .yt <song>")
+    async def play(self, ctx, *input):
+        if not input:
+            await ctx.send(":x: You need to enter a song name or URL!")
+            return
         try:
             vol=0.5
             if ctx.author.voice == None:
@@ -164,16 +172,11 @@ class Music(commands.Cog):
             if voice_channel is None:
                 voice_channel = await channel.connect()
 
-            try:
-                vol = int(input[1]) / 100
-                input = input[0]
-            except:
-                pass
             song = None
-            if "youtube.com" in input:
-                song = await YTDLSource.from_url(input, loop=self.bot.loop, volume=vol)
+            if "youtube.com" in input[0]:
+                song = await YTDLSource.from_url(input[0], loop=self.bot.loop, volume=vol)
             else:
-                song = await YTDLSource.from_text(input, loop=self.bot.loop, volume=vol)
+                song = await YTDLSource.from_text(input[0], loop=self.bot.loop, volume=vol)
             if song == None:
                 await ctx.send(f":x: Failed to find or download {input}")        
                 return
@@ -190,6 +193,8 @@ class Music(commands.Cog):
         except Exception as e:
             print(e)
             await ctx.send(f"{e.args}!")
+        except MissingRequiredArgument as ex:
+            await ctx.send(f":x: You need to enter a song name or URL to play music")
 
 
     @commands.command(name='queue', help="Shows the current youtube queue")
