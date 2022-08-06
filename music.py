@@ -176,7 +176,7 @@ class Music(commands.Cog):
             if "youtube.com" in input[0]:
                 song = await YTDLSource.from_url(input[0], loop=self.bot.loop, volume=vol)
             else:
-                song = await YTDLSource.from_text(input[0], loop=self.bot.loop, volume=vol)
+                song = await YTDLSource.from_text(input, loop=self.bot.loop, volume=vol)
             if song == None:
                 await ctx.send(f":x: Failed to find or download {input}")        
                 return

@@ -36,10 +36,10 @@ class Basic(commands.Cog):
     async def on_member_join(self, member):
         try:
             channel = member.guild.system_channel
-            await channel.send(f"Welcome to the Just The Usual Server, {member.mention}. Please take a moment to review the server rules in #rules. Say .help to learn about available commands, and finally, please be kind and decent to one another and enjoy your stay.")
+            await channel.send(f"Welcome to the Just The Usual Server, {member.mention}. Please take a moment to review the server rules in <#917369626986442792>. After you accept the rules by hitting the thumbs up you'll be able to use the server. Say .help to learn about available commands, and finally, please be kind and decent to one another and enjoy your stay.")
         except:
             channel = member.guild.get_channel("860978254797471745")
-            await channel.send(f"Welcome to the Just The Usual Server, {member.mention}. Please take a moment to review the server rules in #rules. Say .help to learn about available commands, and finally, please be kind and decent to one another and enjoy your stay.")
+            await channel.send(f"Welcome to the Just The Usual Server, {member.mention}. Please take a moment to review the server rules in <#917369626986442792>. After you accept the rules by hitting the thumbs up you'll be able to use the server. Say .help to learn about available commands, and finally, please be kind and decent to one another and enjoy your stay.")
 	
 
     @commands.command(name='duck', help="Gives you a duckduckgo link for the given search values! Usage: .duck <searchValue 1> <searchValue 2> ...")
